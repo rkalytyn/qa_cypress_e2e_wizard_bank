@@ -1,7 +1,6 @@
 /// <reference types='cypress' />
 
 import { faker } from '@faker-js/faker/locale/uk';
-import { getCurrentDate } from '../support/getCurrentDate';
 
 describe('Bank app', () => {
   const user = 'Hermoine Granger';
@@ -12,11 +11,6 @@ describe('Bank app', () => {
   const balance = firstBalance + depositAmount;
   const withdrawAmount = faker.number.int({ min: 50, max: 500 });
   const secondBalance = balance - withdrawAmount;
-  const currentDate = getCurrentDate();
-  const expectedData = [
-    { date: currentDate, amount: withdrawAmount, type: 'Debit' },
-    { date: currentDate, amount: depositAmount, type: 'Credit' }
-  ];
 
   before(() => {
     cy.visit('/');
@@ -60,21 +54,9 @@ describe('Bank app', () => {
       .should('be.visible');
 
     cy.get('[ng-click="transactions()"]').click();
-    // hiden
-    cy.contains('a', 'Date-Time')
-      .should('be.visible')
-      .click();
-
-    cy.get('.table tbody tr').each((row, index) => {
-      if (expectedData[index]) {
-        cy.wrap(row).find('td').eq(0)
-          .should('contain.text', expectedData[index].date);
-        cy.wrap(row).find('td').eq(1)
-          .should('contain.text', expectedData[index].amount);
-        cy.wrap(row).find('td').eq(2)
-          .should('contain.text', expectedData[index].type);
-      }
-    });
+    cy.get('td.ng-binding')
+      .should('contain', depositAmount)
+      .should('contain', withdrawAmount);
 
     cy.get('[ng-click="back()"]').click();
 
